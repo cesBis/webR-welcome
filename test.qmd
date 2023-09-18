@@ -1,9 +1,33 @@
 ---
-title: Test
+title: "Welcome to R :)"
 filters:
   - webr
 ---
 
+This is an example of using [webR](https://github.com/r-wasm/webr/) to demonstrate R without requiring installation.
+
+R comes with example data on cars called `mtcars`. `str()` is a function that summarises the **str**ucture of the data. You can replace it with the `summary()` function to summarize the data. For the most part, R will print information when you submit a name on its own, without a function.
+
+Try out the `summary()` function too!
+
 ```{webr-r}
-hist(rnorm(100))
+str(mtcars)
 ```
+
+You can subset data using the `[` operator. For 2-dimensional data with defined row and column names, such as `mtcars`, the syntax is like so:
+
+```
+dataset["row_name", "column_name"]
+```
+
+You can also replace `row_name` and `column_name` with numbers, and use the syntax `start_integer:end_integer` to have ranges of numbers.
+
+Try out subseting by integers and integer ranges!
+
+```{webr-r}
+mtcars["Mazda RX4", "cyl"]
+```
+
+Not everything will work in `webR` (yet). For example, the built in docs via `?` aren't functional, and [installation of packages is weird](https://github.com/coatless/quarto-webr/blob/e7a682beb0a08f85e5c96d3ce5a5a11230133a72/docs/webr-using-r-packages.qmd#L52), not all packages work, and some may appear to work but not actually be working right. This is a new technology in an experimental phase.
+
+To get all the R goodies, you'll have to install it. Refer to your organization's guidance, or a [CRAN mirror](https://cloud.r-project.org/) for more info.
