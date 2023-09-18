@@ -2,6 +2,8 @@
 
 Discovered webR and quarto at posit conf 2023 and wanted to try it out.
 
+This is rendered to GitHub pages via [this method](https://quarto.org/docs/publishing/github-pages.html#publish-command)
+
 these files come with `quarto add coatless/quarto-webr`
 - `_extensions/`
 - `webr-serviceworker.js`
