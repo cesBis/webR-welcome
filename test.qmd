@@ -1,0 +1,9 @@
+---
+title: Test
+filters:
+  - webr
+---
+
+```{webr-r}
+hist(rnorm(100))
+```
