@@ -1,5 +1,9 @@
 ---
 title: "Welcome to R :)"
+format:
+  revealjs:
+    min-scale: 1.0
+    max-scale: 1.0
 filters:
   - webr
 ---
