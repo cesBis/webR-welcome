@@ -127,6 +127,158 @@ USArrests['Alabama', 'Murder']
 #USArrests[USArrests$UrbanPop < 55 & USArrests$Assault > 200, c('UrbanPop', 'Assault')]
 ```
 
+## R Data Structures
+
+We've overviewed some of R's unique strengths in regards to data, modelling, and plotting, as well as the associated syntax. While getting started, we can oversimplify and describe everything in R as either **data** or a **function**. In this section, we'll focus on examining data more closely.
+
+### Vectors
+
+In R, vectors are the simplest data structure, not scalars. This is a unique feature, and is incredibly useful for working with tabular data as in statistics. We get vectorized operations "out-of-the-box" with R.
+
+Below, `:` is an infix function for creating a vector as a range of integers as `start:end`. `c()` is a function for **c**ombining vectors. `rep(thing_to_repeat, repeated_this_many_times)` is another function. These are just a few ways to create vectors. You can assign the value of a vector to a name with `<-` (often called a variable in programming).
+
+```{webr-r}
+1:3 * 2
+#c(1, 2, 3)
+#c(1:2, 3)
+#rep(1,3)
+#1:3 * rep(2,3)
+#result <- 1:3 * 2
+#result
+```
+
+Notice that `1:3 * 2` and `1:3 * rep(2,3)` return the same result? This is because of R's recycling rules, when you try to perform an element-by-element operation using vectors with sizes that don't match, R repeats the shorter one so that it "grows" to the right size. For `1:3 * 2` the shorter vector is of length 1, is repeated to match the longer vector of length 3, and therefore works as expected. Recycling of shorter vectors is really convinient, but causes strange results sometimes, as in `1:3 * 1:2`.
+
+```{webr-r}
+1:3 * 2
+#1:3 * 1:2
+```
+
+In the examples above, we've only dealt with **integer** vectors. We can also create **character** vectors, **double** precision floating point number vectors, and **logical** vectors. These constitute the **atomic** vectors most commonly used.
+
+```{webr-r}
+typeof(1:3)
+#typeof(c('a', 'b', 'c'))
+#typeof(c(1.1, 2.2))
+#typeof(c(TRUE, FALSE))
+```
+
+Logical vectors are frequently created using comparison operators.
+
+```{webr-r}
+1:3 == c(1, 1, 3)
+#1:3 >= c(1, 1, 3)
+#1:3 < c(1, 1, 3)
+#1:3 %in% c(1, 5)
+#'cat' %in% c('dog', 'cat', 'chicken')
+```
+
+R will coerce the types of vectors as needed in order to perform operations. It will "try it's best" to give an answer by coercing from logical to number to character as needed.
+
+```{webr-r}
+1:3 + TRUE
+#(1:3 * TRUE) == (1:3 * 1)
+#(1:3 * FALSE) == (1:3 * 0)
+#paste('number', 1:3)
+```
+
+This type coercion is considered cringe by some. Whole languages such as TypeScript exist on the premise that such type coersion is bad form. For R though, I think it makes sense. It let's you do things like count the multiples of 17 from 1 to 100 like so (`%%` is the modulus operator, it returns the remainder of dividing the thing on the left by the thing on the right).
+
+```{webr-r}
+sum(1:100 %% 17 == 0)
+```
+
+Alright, that's a contrived example. We'll get to a more realistic one before too long.
+
+Be careful with type conversion in complex code, it can have unexpected results, such as if it tries to combine an integer and a character vector. All elements of a vector must have the same type, which is why `typeof(c(1:3, 'cat'))` coerces the numbers to characters and evaluates to "character".
+
+```{webr-r}
+c(1:3, 'cat')
+#typeof(c(1:3, "cat"))# r let's you use `'` and `"` to denote characters.
+```
+
+The last important vector is the vector of vectors, also known as recursive vectors, or lists. Lists allow (but don't require) you to give a name to each vector, and lists may contain any type of vector of any length, including other lists! If the vector (right side of `=`) is given a name (left side of `=`), then you can extract it with `$name` or `[["name"]]`. Regardless of name, you can extract elements by number.
+
+```{webr-r}
+test_list <- list(integer = 1:3, character = c('a','b','c'), recursive_vector = list(logical = c(TRUE, FALSE), state.abb))
+str(test_list)
+#test_list$integer
+#test_list[['character']]
+#test_list[['character']][2]
+#test_list[[3]][[2]][5]
+```
+
+### Data Frames
+
+R does have data structures for matrices (including matrics with > 2 dimensions, which it calls arrays), but the most common data structure for 2 dimmensional, tabular data is the `data.frame`. A data frame is a special kind of list that requires all elements have the same length, has additional properties like `rownames`, and gets special treatment from many functions.
+
+```
+state <- data.frame(short_name = state.abb, long_name = state.name)
+state
+#typeof(state)
+#rownames(state)
+#str(state)
+```
+
+You can assign new elements (aka columns or variables) to the `list` / `data.frame`. Below, `grepl()` is a function that returns `TRUE` if the text in the first argument is included in the text of the second argument. If you think `grepl` is a terribly weird name for such a function, you're not alone (more on that towards the end). This [video](https://www.youtube.com/watch?v=NTfOnGZUZDk), and `?grepl`, have hints at what the author was likely thinking when they chose such a name.
+
+```
+state$starts_with_A <- grepl('A', state$long_name)
+#str(state)
+#head(state, 10)
+#tail(state, 10)
+count_of_states_that_start_with_A <- sum(state$starts_with_A)
+```
+
+There are many more data structures available for R, but with the most common covered let's move on to functions.
+
+## R Functions
+
+ [R, at its heart, is a functional language.](https://adv-r.hadley.nz/fp.html#fp) This means a few things:
+
+ - We often solve problems by composing several functions which all have clear and explicit inputs and outputs, and are individually simple, but taken together achieve complex operations in bite sized bits.
+ - We can do crazy things with functions, such as accept functions as arguments, or return functions.
+
+For example, count the states by the first letter of their name like so.
+
+```{webr-r}
+sapply(
+  unique(substr(state.name, 1, 1)),
+  function (chr) sum(chr == substr(state.name, 1, 1))
+)
+```
+
+`sapply` is a function that **s**implifies the result off **apply**ing the function provided as the second argument, to each element of the vector provided in the first argument.
+
+There are pinches of [syntactic sugar](https://en.wikipedia.org/wiki/Syntactic_sugar) that we can add to make the operation read more like an english sentence, `|>` and `\()`. `|>` takes the result of the thing on the left and passes it to the first argument of the thing on the right. `\()` is short for `function ()`. Together, they let us rewrite the above like so.
+
+```{webr-r}
+state.name |>
+substr(1, 1) |>
+unique() |>
+sapply(\(chr) sum(chr == substr(state.name, 1, 1)))
+```
+
+Which reads:
+- start with the `state.name` vector, and then
+- take the `substr`ing of it starting with the first character and keeping 1 character, and then
+- take the `unique` values, and then
+- simply apply a function that returns the sum of the number of times the argument is equal to the first letter of the `state.name`s vector to every element.
+
+Alright. That was a lot. Let's go return to some basics and work our way back up.
+
+### Function Components
+
+### Function Definition
+
+### Function Evaluation
+
+### Function Composition
+
+TODO
+- more on that towards the end
+- simulation!
+
 ## The End (of my work so far)
 
 We've meandered through a few of the things that make R special, including:
@@ -139,7 +291,6 @@ We've meandered through a few of the things that make R special, including:
 Other things that make R special that we haven't gone over are:
 
 - It also has a vast ecosystem of extensions
-- Vectors are the simplest data structure, not scalars
 - It priveleges functional programming stylers
 
 This resource is a work in progress. We'll include more material over time.
