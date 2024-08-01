@@ -265,20 +265,6 @@ Which reads:
 - take the `unique` values, and then
 - simply apply a function that returns the sum of the number of times the argument is equal to the first letter of the `state.name`s vector to every element.
 
-Alright. That was a lot. Let's go return to some basics and work our way back up.
-
-### Function Components
-
-### Function Definition
-
-### Function Evaluation
-
-### Function Composition
-
-TODO
-- more on that towards the end
-- simulation!
-
 ## The End (of my work so far)
 
 We've meandered through a few of the things that make R special, including:
